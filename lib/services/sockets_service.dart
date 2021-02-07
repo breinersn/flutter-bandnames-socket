@@ -10,8 +10,12 @@ enum ServerStatus {
 
 class SocketService with ChangeNotifier {
   ServerStatus _serverStatus = ServerStatus.Connecting;
+  IO.Socket _socket;
 
   ServerStatus get serverStatus => this._serverStatus;
+
+  IO.Socket get socket => this._socket;
+  Function get emit => this._socket.emit;
 
   SocketService() {
     this._initConfig();
@@ -19,17 +23,18 @@ class SocketService with ChangeNotifier {
 
   void _initConfig() {
     // Dart client
-    IO.Socket socket = IO.io('http://10.0.2.2:3000/', {
+    this._socket = IO.io('http://10.0.2.2:3000/', {
+      //this._socket = IO.io('https://nodejs-flutter-socket-server.herokuapp.com/', {
       'transports': ['websocket'],
       'autoConnect': true,
     });
 
-    socket.on('connect', (_) {
+    this._socket.on('connect', (_) {
       this._serverStatus = ServerStatus.Online;
       notifyListeners();
     });
 
-    socket.on('disconnect', (_) {
+    this._socket.on('disconnect', (_) {
       this._serverStatus = ServerStatus.Offline;
       notifyListeners();
     });
